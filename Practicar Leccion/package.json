@@ -1,0 +1,25 @@
+{
+  "name": "practicar-leccion",
+  "version": "1.0.0",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "tsc",
+    "start": "tsc && node build/index.js",
+    "start:prod": "SET NODE_ENV=production && npm start",
+    "dev": "concurrently \"nodemon src/index.ts"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "@types/ws": "^8.18.1",
+    "concurrently": "^9.1.2",
+    "typescript": "^5.8.3"
+  },
+  "dependencies": {
+    "nodemon": "^3.1.10",
+    "ws": "^8.18.2"
+  }
+}

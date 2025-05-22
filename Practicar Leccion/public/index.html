@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Chat con Historial</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        background: #f0f0f0;
+        padding: 20px;
+      }
+      #messages {
+        background: #fff;
+        border: 1px solid #ccc;
+        padding: 10px;
+        height: 300px;
+        overflow-y: auto;
+        margin-bottom: 10px;
+        white-space: pre-wrap;
+      }
+      #messageInput,
+      #senderName {
+        padding: 5px;
+        margin: 5px 0;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      button {
+        padding: 8px 12px;
+        font-size: 16px;
+        cursor: pointer;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Chat Global con Historial</h2>
+
+    <input id="senderName" placeholder="Tu nombre" autocomplete="off" />
+    <div id="messages"></div>
+
+    <input
+      id="messageInput"
+      placeholder="Escribe un mensaje"
+      autocomplete="off"
+    />
+    <button onclick="sendMessage()">Enviar</button>
+
+    <script>
+      const socket = new WebSocket("ws://localhost:3000");
+
+      socket.onopen = () => {
+        console.log("Conectado al servidor WebSocket");
+      };
+
+      socket.onerror = (err) => {
+        console.error("Error en WebSocket:", err);
+      };
+
+      socket.onmessage = (event) => {
+        try {
+          const data = JSON.parse(event.data);
+
+          if (data.type === "history") {
+            data.messages.forEach((msg) => addMessage(msg));
+          } else if (data.type === "message") {
+            addMessage(data.message);
+          }
+        } catch (e) {
+          console.error("Error al parsear mensaje:", e);
+        }
+      };
+
+      function sendMessage() {
+        const input = document.getElementById("messageInput");
+        const senderInput = document.getElementById("senderName");
+
+        const sender = senderInput.value.trim() || "Anónimo";
+        const content = input.value.trim();
+
+        if (!content) return;
+
+        const msgObj = { sender, content };
+        socket.send(JSON.stringify(msgObj));
+        input.value = "";
+        input.focus();
+      }
+
+      function addMessage(msg) {
+        const messagesDiv = document.getElementById("messages");
+        const msgElement = document.createElement("div");
+
+        const time = new Date(msg.time).toLocaleTimeString();
+        msgElement.textContent = `[${time}] ${msg.sender}: ${msg.content}`;
+
+        messagesDiv.appendChild(msgElement);
+        messagesDiv.scrollTop = messagesDiv.scrollHeight;
+      }
+    </script>
+  </body>
+</html>

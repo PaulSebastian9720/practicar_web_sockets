@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Adivina el Número - WebSocket</title>
+    <style>
+      body {
+        font-family: sans-serif;
+        margin: 30px;
+        background: #fafafa;
+      }
+      #log {
+        height: 300px;
+        border: 1px solid #ccc;
+        background: white;
+        overflow-y: auto;
+        padding: 10px;
+        margin-bottom: 10px;
+      }
+      input,
+      button {
+        padding: 10px;
+        font-size: 16px;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Adivina el Número (1-100)</h2>
+    <div id="log"></div>
+    <input id="name" placeholder="Tu nombre" />
+    <input
+      id="guess"
+      type="number"
+      placeholder="Tu intento"
+      min="1"
+      max="100"
+    />
+    <button onclick="sendGuess()">Adivinar</button>
+
+    <script>
+      const log = document.getElementById("log");
+      const ws = new WebSocket("ws://localhost:3000");
+
+      ws.onopen = () => addLog("Conectado al juego.");
+      ws.onclose = () => addLog("Conexión cerrada.");
+      ws.onerror = () => addLog("Error en la conexión.");
+
+      ws.onmessage = (event) => {
+        const data = JSON.parse(event.data);
+        addLog(data.message);
+      };
+
+      function sendGuess() {
+        const name = document.getElementById("name").value.trim() || "Anónimo";
+        const guessInput = document.getElementById("guess");
+        const guess = Number(guessInput.value);
+        if (!guess || guess < 1 || guess > 100) {
+          alert("Ingresa un número entre 1 y 100.");
+          return;
+        }
+
+        const msg = { sender: name, guess };
+        ws.send(JSON.stringify(msg));
+        guessInput.value = "";
+      }
+
+      function addLog(text) {
+        const div = document.createElement("div");
+        div.textContent = text;
+        log.appendChild(div);
+        log.scrollTop = log.scrollHeight;
+      }
+    </script>
+  </body>
+</html>
